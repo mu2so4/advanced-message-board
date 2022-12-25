@@ -1,18 +1,20 @@
 package ru.nsu.ccfit.announces;
+import ru.nsu.ccfit.announces.db.AnnounceDB;
+
 import java.sql.*;
+import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
-        Connection c = null;
-        try {
-            Class.forName("org.postgresql.Driver");
-            c = DriverManager
-                    .getConnection("jdbc:postgresql://localhost:5432/announces",
-                            "announceDB", "12121212");
+        String[] params = new String[1];
+        Scanner scanner = new Scanner(System.in);
+        params[0] = scanner.next();
+        scanner.close();
+        try (AnnounceDB db = AnnounceDB.getInstance()) {
+            db.insertOrUpdate("INSERT INTO \"Subjects\"(\"subject_name\")" +
+                    "VALUES (?)", params);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName()+": "+e.getMessage());
-            System.exit(1);
+            throw new RuntimeException(e);
         }
-        System.out.println("Database opened successfully");
     }
 }
