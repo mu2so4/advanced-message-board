@@ -20,19 +20,15 @@ public class AnnounceDB implements AutoCloseable {
         return statement.executeQuery();
     }
 
-    public int insertOrUpdate(String body, String[] args) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(body);
-        for(int index = 0; index < args.length; index++) {
-            statement.setString(index + 1, args[index]);
-        }
-        return statement.executeUpdate();
-    }
-
     public static AnnounceDB getInstance() throws SQLException {
         if(instance == null) {
             instance = new AnnounceDB();
         }
         return instance;
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 
     @Override
