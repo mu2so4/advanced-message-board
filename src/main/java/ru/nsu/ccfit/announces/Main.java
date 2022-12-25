@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.announces;
 import ru.nsu.ccfit.announces.db.AnnounceDB;
+import ru.nsu.ccfit.announces.db.AuthQueries;
 import ru.nsu.ccfit.announces.db.SqlModifiers;
 import ru.nsu.ccfit.announces.db.SqlQueries;
 
@@ -14,7 +15,7 @@ public class Main {
         String password = scanner.nextLine();
         scanner.close();
         try (AnnounceDB db = AnnounceDB.getInstance()) {
-            int id = SqlQueries.checkCredentials(login, password);
+            String id = AuthQueries.checkCredentials(login, password);
             System.out.println(id);
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -29,25 +29,10 @@ public final class SqlQueries {
                 prepareStatement("SELECT * FROM \"Subjects\" WHERE \"subject_id\"= ? ;");
         statement.setInt(1, id);
         ResultSet set = statement.executeQuery();
-        if(set.next()) {
+        if (set.next()) {
             return SubjectReader.read(set);
-        }
-        else {
+        } else {
             return null;
-        }
-    }
-
-    public static int checkCredentials(String login, String password) throws SQLException {
-        PreparedStatement statement = AnnounceDB.getInstance().getConnection().
-                prepareStatement("SELECT user_id FROM \"Users\" WHERE \"login\"= ? AND \"password\" = ? ;");
-        statement.setString(1, login);
-        statement.setString(2, password);
-        ResultSet set = statement.executeQuery();
-        if(set.next()) {
-            return set.getInt("user_id");
-        }
-        else {
-            return -1;
         }
     }
 }
