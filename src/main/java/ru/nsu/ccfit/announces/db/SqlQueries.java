@@ -36,4 +36,18 @@ public final class SqlQueries {
             return null;
         }
     }
+
+    public static int checkCredentials(String login, String password) throws SQLException {
+        PreparedStatement statement = AnnounceDB.getInstance().getConnection().
+                prepareStatement("SELECT user_id FROM \"Users\" WHERE \"login\"= ? AND \"password\" = ? ;");
+        statement.setString(1, login);
+        statement.setString(2, password);
+        ResultSet set = statement.executeQuery();
+        if(set.next()) {
+            return set.getInt("user_id");
+        }
+        else {
+            return -1;
+        }
+    }
 }
