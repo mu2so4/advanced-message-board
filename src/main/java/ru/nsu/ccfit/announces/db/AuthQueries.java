@@ -5,8 +5,10 @@ import java.sql.*;
 import java.util.Base64;
 
 public class AuthQueries {
-    private static final SecureRandom secureRandom = new SecureRandom(); //threadsafe
+    private static final SecureRandom secureRandom = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
+    public static final int ERROR_INVALID_AUTH = -1;
+    public static final int ERROR_TOKEN_EXPIRED = -2;
     public static String checkCredentials(String login, String password) throws SQLException {
         Connection connection = AnnounceDB.getInstance().getConnection();
         PreparedStatement statement = connection.
@@ -34,19 +36,22 @@ public class AuthQueries {
     public static int checkToken(String token) throws SQLException {
         Connection connection = AnnounceDB.getInstance().getConnection();
         PreparedStatement statement = connection.
-                prepareStatement("SELECT * FROM \"AuthTokens\" WHERE \"token\"= ? AND " +
-                        "NOW() <= \"expiration_time\";");
+                prepareStatement("SELECT user_id, NOW() > \"expiration_time\" AS \"is_expired\"" +
+                        "FROM \"AuthTokens\" WHERE \"token\"= ? ;");
         statement.setString(1, token);
         ResultSet set = statement.executeQuery();
         if(!set.next()) {
-            return -1;
+            return ERROR_INVALID_AUTH;
+        }
+        if(set.getBoolean("is_expired")) {
+            return ERROR_TOKEN_EXPIRED;
         }
         return set.getInt("user_id");
     }
 
-    public static void clearOldTokens() throws SQLException {
+    public static void clearExpiredTokens() throws SQLException {
         Connection connection = AnnounceDB.getInstance().getConnection();
         Statement statement = connection.createStatement();
-        statement.executeQuery("DELETE FROM \"AuthTokens\" WHERE NOW() > \"expiration_time\";");
+        statement.executeUpdate("DELETE FROM \"AuthTokens\" WHERE NOW() > \"expiration_time\";");
     }
 }

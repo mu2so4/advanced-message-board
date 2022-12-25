@@ -19,6 +19,7 @@ public class Main {
             int id = AuthQueries.checkToken(token);
             System.out.println(id);
             System.out.println(token);
+            AuthQueries.clearExpiredTokens();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
