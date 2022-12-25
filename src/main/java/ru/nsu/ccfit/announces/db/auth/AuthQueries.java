@@ -1,4 +1,6 @@
-package ru.nsu.ccfit.announces.db;
+package ru.nsu.ccfit.announces.db.auth;
+
+import ru.nsu.ccfit.announces.db.AnnounceDB;
 
 import java.security.SecureRandom;
 import java.sql.*;
@@ -9,7 +11,8 @@ public class AuthQueries {
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
     public static final int ERROR_INVALID_AUTH = -1;
     public static final int ERROR_TOKEN_EXPIRED = -2;
-    public static String checkCredentials(String login, String password) throws SQLException {
+    public static String checkCredentials(String login, String password) throws SQLException,
+            CredentialNotFoundException {
         Connection connection = AnnounceDB.getInstance().getConnection();
         PreparedStatement statement = connection.
                 prepareStatement("SELECT user_id FROM \"Users\" WHERE \"login\"= ? AND \"password\" = ? ;");
@@ -17,7 +20,7 @@ public class AuthQueries {
         statement.setString(2, password);
         ResultSet set = statement.executeQuery();
         if(!set.next()) {
-            return null;
+            throw new CredentialNotFoundException();
         }
         int userId = set.getInt("user_id");
         byte[] randomBytes = new byte[24];
@@ -33,7 +36,7 @@ public class AuthQueries {
         return token;
     }
 
-    public static int checkToken(String token) throws SQLException {
+    public static int checkToken(String token) throws SQLException, AuthenticationException {
         Connection connection = AnnounceDB.getInstance().getConnection();
         PreparedStatement statement = connection.
                 prepareStatement("SELECT user_id, NOW() > \"expiration_time\" AS \"is_expired\"" +
@@ -41,10 +44,10 @@ public class AuthQueries {
         statement.setString(1, token);
         ResultSet set = statement.executeQuery();
         if(!set.next()) {
-            return ERROR_INVALID_AUTH;
+            throw new TokenNotFoundException();
         }
         if(set.getBoolean("is_expired")) {
-            return ERROR_TOKEN_EXPIRED;
+            throw new TokenExpiredException();
         }
         return set.getInt("user_id");
     }
