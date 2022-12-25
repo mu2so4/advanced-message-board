@@ -15,8 +15,10 @@ public class Main {
         String password = scanner.nextLine();
         scanner.close();
         try (AnnounceDB db = AnnounceDB.getInstance()) {
-            String id = AuthQueries.checkCredentials(login, password);
+            String token = AuthQueries.checkCredentials(login, password);
+            int id = AuthQueries.checkToken(token);
             System.out.println(id);
+            System.out.println(token);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

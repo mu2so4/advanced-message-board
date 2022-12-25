@@ -1,10 +1,7 @@
 package ru.nsu.ccfit.announces.db;
 
 import java.security.SecureRandom;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Base64;
 
 public class AuthQueries {
@@ -32,5 +29,24 @@ public class AuthQueries {
         hashStatement.setInt(2, userId);
         hashStatement.executeUpdate();
         return token;
+    }
+
+    public static int checkToken(String token) throws SQLException {
+        Connection connection = AnnounceDB.getInstance().getConnection();
+        PreparedStatement statement = connection.
+                prepareStatement("SELECT * FROM \"AuthTokens\" WHERE \"token\"= ? AND " +
+                        "NOW() <= \"expiration_time\";");
+        statement.setString(1, token);
+        ResultSet set = statement.executeQuery();
+        if(!set.next()) {
+            return -1;
+        }
+        return set.getInt("user_id");
+    }
+
+    public static void clearOldTokens() throws SQLException {
+        Connection connection = AnnounceDB.getInstance().getConnection();
+        Statement statement = connection.createStatement();
+        statement.executeQuery("DELETE FROM \"AuthTokens\" WHERE NOW() > \"expiration_time\";");
     }
 }
