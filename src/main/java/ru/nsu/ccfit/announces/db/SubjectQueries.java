@@ -5,10 +5,7 @@ import ru.nsu.ccfit.announces.db.auth.AuthenticationException;
 import ru.nsu.ccfit.announces.subject.Subject;
 import ru.nsu.ccfit.announces.subject.SubjectReader;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +35,18 @@ public final class SubjectQueries {
         }
     }
 
+    public static void addSubjects(String authToken, String[] names) throws SQLException,
+            AuthenticationException {
+        AuthQueries.checkToken(authToken);
+        Connection connection = AnnounceDB.getInstance().getConnection();
+        PreparedStatement statement = connection.
+                prepareStatement("INSERT INTO \"Subjects\"(\"subject_name\")" +
+                        "VALUES (UNNEST(?));");
+        Array arr = connection.createArrayOf("varchar", names);
+        statement.setArray(1, arr);
+        statement.executeUpdate();
+    }
+
     public static void renameSubject(String authToken, int subjectId, String newName) throws SQLException,
             AuthenticationException {
         AuthQueries.checkToken(authToken);
@@ -55,4 +64,19 @@ public final class SubjectQueries {
         statement.executeUpdate();
     }
 
+    public static void removeSubjects(String authToken, Integer[] subjectIds)
+            throws SQLException, AuthenticationException {
+        AuthQueries.checkToken(authToken);
+        String query =
+                """
+                DELETE FROM "Subjects"
+                WHERE
+                    subject_id = ANY(?);
+                """;
+        Connection connection = AnnounceDB.getInstance().getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        Array arr = connection.createArrayOf("integer", subjectIds);
+        statement.setArray(1, arr);
+        statement.executeUpdate();
+    }
 }
