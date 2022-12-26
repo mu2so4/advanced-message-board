@@ -12,14 +12,6 @@ public class AnnounceDB implements AutoCloseable {
                         "announceDB", "12121212");
     }
 
-    public ResultSet sendQuery(String body, String[] args) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(body);
-        for(int index = 0; index < args.length; index++) {
-            statement.setString(index + 1, args[index]);
-        }
-        return statement.executeQuery();
-    }
-
     public static AnnounceDB getInstance() throws SQLException {
         if(instance == null) {
             instance = new AnnounceDB();
