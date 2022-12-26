@@ -153,4 +153,20 @@ public final class AnnounceQueries {
         connection.setAutoCommit(true);
     }
 
+    public static void EditAnnounce(String authToken, int announceId, String newText)
+            throws SQLException, AuthenticationException {
+        AuthQueries.checkToken(authToken);
+        String query =
+                """
+                UPDATE "Announces"
+                SET
+                    text = ?
+                WHERE announce_id = ?;
+                """;
+        Connection connection = AnnounceDB.getInstance().getConnection();
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setString(1, newText);
+        statement.setInt(2, announceId);
+        statement.executeUpdate();
+    }
 }
