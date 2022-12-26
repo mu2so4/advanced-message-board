@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.announces.db;
 
+import ru.nsu.ccfit.announces.db.auth.AuthQueries;
+import ru.nsu.ccfit.announces.db.auth.AuthenticationException;
 import ru.nsu.ccfit.announces.subject.Subject;
 import ru.nsu.ccfit.announces.subject.SubjectReader;
 
@@ -10,8 +12,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class SqlQueries {
-    private SqlQueries() {}
+public final class SubjectQueries {
+    private SubjectQueries() {}
 
     public static List<Subject> getAllSubjects() throws SQLException {
         Statement statement = AnnounceDB.getInstance().getConnection().createStatement();
@@ -35,4 +37,22 @@ public final class SqlQueries {
             return null;
         }
     }
+
+    public static void renameSubject(String authToken, int subjectId, String newName) throws SQLException,
+            AuthenticationException {
+        AuthQueries.checkToken(authToken);
+        String query =
+                """
+                UPDATE "Subjects"
+                SET subject_name = ?
+                WHERE
+                    subject_id = ?;
+                """;
+        PreparedStatement statement = AnnounceDB.getInstance().getConnection().
+                prepareStatement(query);
+        statement.setString(1, newName);
+        statement.setInt(2, subjectId);
+        statement.executeUpdate();
+    }
+
 }

@@ -1,22 +1,23 @@
 package ru.nsu.ccfit.announces;
 import ru.nsu.ccfit.announces.db.AnnounceDB;
 import ru.nsu.ccfit.announces.db.AnnounceQueries;
+import ru.nsu.ccfit.announces.db.SubjectQueries;
 import ru.nsu.ccfit.announces.db.auth.AuthQueries;
 
+import java.sql.ResultSet;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String text = scanner.nextLine();
-        int count = scanner.nextInt();
-        Integer[] ids = new Integer[count];
-        for(int index = 0; index < count; index++) {
-            ids[index] = scanner.nextInt();
-        }
+        String login = scanner.nextLine();
+        String password = scanner.nextLine();
+        int id = scanner.nextInt(); scanner.nextLine();
+        String newName = scanner.nextLine();
         scanner.close();
         try (AnnounceDB db = AnnounceDB.getInstance()) {
-            AnnounceQueries.submitAnnounceSuggestion(text, ids);
+            String token = AuthQueries.checkCredentials(login, password);
+            SubjectQueries.renameSubject(token, id, newName);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
